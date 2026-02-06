@@ -1,5 +1,6 @@
-import { streamText, UIMessage, convertToModelMessages } from 'ai';
+import { streamText, UIMessage, convertToModelMessages, tool } from 'ai';
 import { google } from '@ai-sdk/google';
+import { z } from 'zod';
 
 const model = google('gemini-2.5-flash');
 
@@ -9,6 +10,21 @@ export async function POST(req: Request) {
     const result = streamText({
         model,
         messages: await convertToModelMessages(messages),
+        tools: {
+            weather: tool({
+                description: 'Get the weather in a location (fahrenheit)',
+                inputSchema: z.object({
+                    location: z.string().describe('The location to get the weather for'),
+                }),
+                execute: async ({ location }) => {
+                    const temperature = Math.round(Math.random() * (90 - 32) + 32);
+                    return {
+                        location,
+                        temperature,
+                    };
+                },
+            }),
+        },
     });
 
     return result.toUIMessageStreamResponse();
