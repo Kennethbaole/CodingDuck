@@ -1,4 +1,4 @@
-import { streamText, UIMessage, convertToModelMessages, tool } from 'ai';
+import { streamText, UIMessage, convertToModelMessages, tool, stepCountIs } from 'ai';
 import { google } from '@ai-sdk/google';
 import { z } from 'zod';
 
@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     const result = streamText({
         model,
         messages: await convertToModelMessages(messages),
+        stopWhen: stepCountIs(3),
         tools: {
             weather: tool({
                 description: 'Get the weather in a location (fahrenheit)',
