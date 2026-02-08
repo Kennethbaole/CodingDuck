@@ -16,21 +16,19 @@ export async function POST(req: Request) {
         stopWhen: stepCountIs(3),
         // Define tools object with available tools for the model
         tools: {
-            weather: tool({
-                // Description helps the model understand when to use this tool
-                description: 'Get the weather in a location (fahrenheit)',
-                // Input schema using Zod - model will extract location from conversation
-                // If it can't determine the location, it will ask the user
+            logDebugStep: tool({
+                // tells ai when to use 
+                description: 'Logs debugging process',
+                // defines data ai must provide (validated by Zod)
                 inputSchema: z.object({
-                    location: z.string().describe('The location to get the weather for'),
+                    step: z.string().describe('the debugging step that user complete'),
+                    finding: z.string().describe('What the user discovered in this step')
                 }),
                 // Execute function runs on the server - can fetch real data from external APIs
-                // This simulates weather data with a random temperature
-                execute: async ({ location }) => {
-                    const temperature = Math.round(Math.random() * (90 - 32) + 32);
+                execute: async ({ step, finding }) => {
                     return {
-                        location,
-                        temperature,
+                        step,
+                        finding,
                     };
                 },
             }),
