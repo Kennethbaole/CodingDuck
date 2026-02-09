@@ -132,15 +132,25 @@ export async function POST(req: Request) {
             searchCode: tool({
                 description: 'Search for code in the repo',
                 inputSchema: z.object({
-
+                    query: z.string().describe('Search the query like "functionName repo:owner/repo"')
                 }),
-                execute: async ({ }) => {
+                execute: async ({ query }) => {
                     try {
+                        const response = await octokit.rest.search.code({ q: query });
                         return {
-
+                            success: true, 
+                            total_count: response.data.total_count,
+                            results: response.data.items.slice(0, 10).map(item => ({
+                                path: item.path, 
+                                repository: item.repository.full_name,
+                                url: item.html_url
+                            }))
                         }
                     } catch (error) {
-
+                        return {
+                            success: false,
+                            error: String(error)
+                        }
                     }
                 },
             }),
