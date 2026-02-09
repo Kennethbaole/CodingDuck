@@ -2,8 +2,10 @@
 import { streamText, UIMessage, convertToModelMessages, tool, stepCountIs } from 'ai';
 import { google } from '@ai-sdk/google';
 import { z } from 'zod';
+import { Octokit } from 'octokit';
 
 const model = google('gemini-2.5-flash');
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 export async function POST(req: Request) {
     const { messages }: { messages: UIMessage[] } = await req.json();
@@ -36,6 +38,34 @@ export async function POST(req: Request) {
                         return {
                             success: false,
                             error: String(error),
+                        }
+                    }
+                },
+            }),
+            getIssue: tool({
+                description: 'Get any issues from user inputted repo information',
+                inputSchema: z.object({
+                    owner: z.string().describe('Who owns the repo'),
+                    repo: z.string().describe('The name of the repository'),
+                    issueNumber: z.number().describe('The issue number')
+                }),
+                execute: async ({ owner, repo, issueNumber }) => {
+                    try {
+                        const response = await octokit.rest.issues.get({
+                            owner,
+                            repo, 
+                            issue_number: issueNumber 
+                        })
+                        return {
+                            success: true, 
+                            title: response.data.title, 
+                            body: response.data.body,
+                            state: response.data.state, 
+                        }
+                    } catch (error) {
+                        return {
+                            success: false,
+                            error: String(error)
                         }
                     }
                 },
