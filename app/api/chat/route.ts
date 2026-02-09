@@ -96,20 +96,36 @@ export async function POST(req: Request) {
                         return {
                             success: false,
                             error: String(error)
-                        }
+                        };
                     }
                 },
             }),
             getPullRequest: tool({
                 description: 'get the PR with the difference',
                 inputSchema: z.object({
-
+                    owner: z.string().describe('The owner of the repo'),
+                    repo: z.string().describe('The name of the repo'),
+                    pull_number: z.number().describe('The number of the pull request')
                 }),
-                execute: async ({ }) => {
+                execute: async ({ owner, repo, pull_number }) => {
                     try {
-                        
+                        const response = await octokit.rest.pulls.get({
+                            owner, 
+                            repo, 
+                            pull_number,
+                        });
+                        return {
+                            success: true,
+                            title: response.data.title,
+                            body: response.data.body,
+                            state: response.data.state,
+                            diff_url: response.data.diff_url
+                        }
                     } catch (error) {
-
+                        return {
+                            success: false,
+                            error: String(error)
+                        }
                     }
                 },
             }),
@@ -120,7 +136,9 @@ export async function POST(req: Request) {
                 }),
                 execute: async ({ }) => {
                     try {
-                        
+                        return {
+
+                        }
                     } catch (error) {
 
                     }
