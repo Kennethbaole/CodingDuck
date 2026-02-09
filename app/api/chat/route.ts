@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         model,
         messages: await convertToModelMessages(messages),
         // Allow up to 3 steps: tool call -> tool result -> text response
-        stopWhen: stepCountIs(3),
+        stopWhen: stepCountIs(5),
         // Define tools object with available tools for the model
         tools: {
             logDebugStep: tool({
@@ -26,10 +26,18 @@ export async function POST(req: Request) {
                 }),
                 // Execute function runs on the server - can fetch real data from external APIs
                 execute: async ({ step, finding }) => {
-                    return {
-                        step,
-                        finding,
-                    };
+                    try {
+                        return {
+                            success: true, 
+                            step,
+                            finding,
+                        };
+                    } catch (error) {
+                        return {
+                            success: false,
+                            error: String(error),
+                        }
+                    }
                 },
             }),
         },
