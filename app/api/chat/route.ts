@@ -70,6 +70,62 @@ export async function POST(req: Request) {
                     }
                 },
             }),
+            getFileContent: tool({
+                description: 'Read a selected file from the repo',
+                inputSchema: z.object({
+                    owner: z.string().describe('The owner of the repo'),
+                    repo: z.string().describe('The name of the repo'),
+                    path: z.string().describe('The path to the file')
+                }),
+                execute: async ({ owner, repo, path }) => {
+                    try {
+                        const response = await octokit.rest.repos.getContent({
+                            owner,
+                            repo,
+                            path,
+                        });
+
+                        const fileData = response.data as { content: string; path: string };
+
+                        return {
+                            success: true, 
+                            path: fileData.path,
+                            content: Buffer.from(fileData.content, 'base64').toString('utf-8')
+                        };
+                    } catch (error) {
+                        return {
+                            success: false,
+                            error: String(error)
+                        }
+                    }
+                },
+            }),
+            getPullRequest: tool({
+                description: 'get the PR with the difference',
+                inputSchema: z.object({
+
+                }),
+                execute: async ({ }) => {
+                    try {
+                        
+                    } catch (error) {
+
+                    }
+                },
+            }),
+            searchCode: tool({
+                description: 'Search for code in the repo',
+                inputSchema: z.object({
+
+                }),
+                execute: async ({ }) => {
+                    try {
+                        
+                    } catch (error) {
+
+                    }
+                },
+            }),
         },
         // Note: If you see blank responses in the UI, the model generated a tool call
         // instead of text. Access tool results via message.parts with type 'tool-invocation'
